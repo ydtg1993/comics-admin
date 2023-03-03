@@ -5,6 +5,7 @@ namespace App\Admin\Controllers\Review;
 use App\Admin\Controllers\CommonController;
 use App\Models\Comic;
 use App\Models\SourceComic;
+use DLP\Layer\Dialog;
 use DLP\Assembly\Wing;
 use DLP\Tool\Assistant;
 use DLP\Widget\Plane;
@@ -63,29 +64,19 @@ class SourceComicController extends AdminController
             $actions->disableEdit();
             $actions->disableDelete();
             $url = CommonController::getCurrentUrl();
-
+            $dialog = (new Dialog())->info('已经存在相同漫画 是否进行覆盖操作?')->button('测试')->compile();
             $actions->add(Plane::rowAction('发布漫画', $url . "/{$actions->row->id}/edit", ['url' => $url . "/{$actions->row->id}",
 'callback'=> <<<EOF
             function(response){
                 let tip = document.createElement('div');
                 tip.style = "display: flex;align-items: center;justify-content: center;height: 30px;";
                 tip.innerText = "已经存在相同漫画 是否进行覆盖操作?";
-                let dom = _component.dialog(tip);
-                let div = document.createElement('div');
-                div.style = "display: flex;align-items: center;justify-content: center;height: 30px;";
-                let button = document.createElement('button');
-                button.className = "btn btn-primary";
-                button.innerText = "覆盖";
-                div.append(button);
-                dom.append(div);
+                {$dialog}
 
-                button.addEventListener('click', () => {
-
-                }, false);
             }
 EOF
             ]));
-            $actions->add(Plane::rowAction('数据源', rtrim(config('app.url'), '/') . '/admin/source.comic/'.$actions->row->id));
+            $actions->add(Plane::rowAction('数据源', rtrim(config('app.url'), '/') . '/admin/source.comic/'.$actions->row->id)->withoutBind());
         });
 
         /*查询匹配*/
@@ -158,7 +149,7 @@ EOF
         $W->display('id')->label('ID')->value($comic->id);
         $W->text('title')->label('标题')->value($comic->title);
         $W->text('source_url')->label('源地址')->value($comic->source_url);
-        $W->datepicker('create_at')->label('创建时间');
+        $W->datepicker('create_at')->label('创建时间')->value($comic->created_at);
         $source_data = $comic->source_data;
         $W->textarea('source')->label('源信息')->rows(13)->value($source_data);
         return $W->form()->compile();
