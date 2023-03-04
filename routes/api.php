@@ -17,5 +17,3 @@ use Illuminate\Support\Facades\Route;
 //Route::middleware('auth:api')->get('/user', function (Request $request) {
 //    return $request->user();
 //});
-Route::any('k8s/healthy', 'K8sController@healthy');
-Route::any('k8s/ready', 'K8sController@ready');
